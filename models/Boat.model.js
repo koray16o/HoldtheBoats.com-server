@@ -7,10 +7,12 @@ const boatSchema = new Schema(
       required: true
     },
 
-    imgURL: {
-      type: String,
-      required: true
-    },
+    imgURL: [
+      {
+        type: String,
+        required: true
+      }
+    ],
 
     type: {
       type: String,
