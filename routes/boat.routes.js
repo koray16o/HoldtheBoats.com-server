@@ -14,7 +14,7 @@ router.get('/boats', async (req, res, next) => {
 });
 
 router.post('/newboat', async (req, res, next) => {
-  const { title, imgURL, type, form, description, country } = req.body;
+  const { title, imgURL, type, form, description, country, price } = req.body;
 
   try {
     const newBoat = await Boat.create({
@@ -23,7 +23,8 @@ router.post('/newboat', async (req, res, next) => {
       type,
       form,
       description,
-      country
+      country,
+      price
     });
     res.json(newBoat);
   } catch (error) {
@@ -54,7 +55,7 @@ router.get('/boats/:id', async (req, res, next) => {
 
 router.put('/boats/:id', async (req, res, next) => {
   const { id } = req.params;
-  const { title, imgURL, type, form, description, country } = req.body;
+  const { title, imgURL, type, form, description, country, price } = req.body;
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id))
@@ -68,7 +69,8 @@ router.put('/boats/:id', async (req, res, next) => {
         type,
         form,
         description,
-        country
+        country,
+        price
       },
       { new: true } //We need to pass this to receive the updated values
     );

@@ -30,6 +30,10 @@ const boatSchema = new Schema(
     country: {
       type: String,
       required: true
+    },
+    price: {
+      type: String,
+      required: true
     }
   },
   {
