@@ -40,7 +40,7 @@ router.get('/boats/:id', async (req, res, next) => {
       return res.status(400).json({ message: 'Specified id is not valid' });
     }
 
-    const boat = await Boat.findById(id).populate('info');
+    const boat = await Boat.findById(id);
     if (!boat) {
       return res.status(404).json({ message: 'No boat found with that id' });
     }
@@ -71,7 +71,7 @@ router.put('/boats/:id', async (req, res, next) => {
         country
       },
       { new: true } //We need to pass this to receive the updated values
-    ).populate('info');
+    );
 
     if (!updatedBoat) {
       return res
@@ -100,9 +100,9 @@ router.delete('/boats/:id', async (req, res, next) => {
   }
 });
 
-router.post('/upload', fileUploader.array('file'), (req, res, next) => {
+router.post('/upload', fileUploader.array('files'), (req, res, next) => {
   try {
-    res.json({ fileUrl: req.file.path });
+    res.json({ fileUrl: req.files[0].path });
   } catch (error) {
     res.status(500).json({ message: 'An error occurred uploading the files' });
     next(error);
