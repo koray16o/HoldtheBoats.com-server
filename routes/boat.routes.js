@@ -14,14 +14,54 @@ router.get('/boats', async (req, res, next) => {
 });
 
 router.post('/newboat', async (req, res, next) => {
-  const { title, imgURL, type, form, description, country, price } = req.body;
+  const {
+    title,
+    imgURL,
+    type,
+    year,
+    condition,
+    length,
+    beam,
+    draught,
+    displacement,
+    material,
+    steering,
+    keel,
+    ballast,
+    headroom,
+    cabins,
+    berths,
+    watertank,
+    propulsion,
+    engine,
+    fuelType,
+    description,
+    country,
+    price
+  } = req.body;
 
   try {
     const newBoat = await Boat.create({
       title,
       imgURL,
       type,
-      form,
+      year,
+      condition,
+      length,
+      beam,
+      draught,
+      displacement,
+      material,
+      steering,
+      keel,
+      ballast,
+      headroom,
+      cabins,
+      berths,
+      watertank,
+      propulsion,
+      engine,
+      fuelType,
       description,
       country,
       price
@@ -55,7 +95,31 @@ router.get('/boats/:id', async (req, res, next) => {
 
 router.put('/boats/:id', async (req, res, next) => {
   const { id } = req.params;
-  const { title, imgURL, type, form, description, country, price } = req.body;
+  const {
+    title,
+    imgURL,
+    type,
+    year,
+    condition,
+    length,
+    beam,
+    draught,
+    displacement,
+    material,
+    steering,
+    keel,
+    ballast,
+    headroom,
+    cabins,
+    berths,
+    watertank,
+    propulsion,
+    engine,
+    fuelType,
+    description,
+    country,
+    price
+  } = req.body;
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id))
@@ -67,7 +131,23 @@ router.put('/boats/:id', async (req, res, next) => {
         title,
         imgURL,
         type,
-        form,
+        year,
+        condition,
+        length,
+        beam,
+        draught,
+        displacement,
+        material,
+        steering,
+        keel,
+        ballast,
+        headroom,
+        cabins,
+        berths,
+        watertank,
+        propulsion,
+        engine,
+        fuelType,
         description,
         country,
         price
