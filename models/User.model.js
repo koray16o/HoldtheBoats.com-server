@@ -23,7 +23,8 @@ const userSchema = new Schema(
     isCompany: {
       type: Boolean,
       default: false
-    }
+    },
+    favouriteBoats: [{ type: Schema.Types.ObjectId, ref: 'Boat' }]
   },
   {
     timestamps: true

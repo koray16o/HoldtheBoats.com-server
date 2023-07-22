@@ -2,6 +2,7 @@ const router = require('express').Router();
 const Boat = require('../models/Boat.model');
 const mongoose = require('mongoose');
 const fileUploader = require('../config/cloudinary.config');
+const User = require('../models/User.model');
 
 router.get('/boats', async (req, res, next) => {
   try {
@@ -188,6 +189,47 @@ router.post('/upload', fileUploader.array('files'), (req, res, next) => {
   } catch (error) {
     res.status(500).json({ message: 'An error occurred uploading the files' });
     next(error);
+  }
+});
+
+router.post('/search', async (req, res) => {
+  const searchQuery = req.body.search;
+  const boats = await Boat.find();
+
+  const filteredBoats = boats.filter(boat => {
+    if (boat.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return boat;
+    } else {
+      return;
+    }
+  });
+  res.json({ boats: filteredBoats, searchQuery });
+});
+
+router.get('/boats/favourites', async (req, res) => {
+  const userId = req.session.currentUser._id;
+  const user = await User.findById(userId).populate('favouriteBoats');
+
+  res.json({ favouriteBoats: user.favouriteBoats });
+});
+
+router.post('/boats/:id/favourites', async (req, res) => {
+  const userId = req.session.currentUser._id;
+  const userToCheck = await User.findById(userId);
+  const user = await User.findByIdAndUpdate(userId, {
+    $push: { favouriteBoats: req.params.id }
+  });
+  res.json(user);
+});
+
+router.post('/boats/favourites/delete/:id', async (req, res) => {
+  try {
+    const userId = req.session.currentUser._id;
+    await User.findByIdAndUpdate(userId, {
+      $pull: { favouriteBoats: req.params.id }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting favourite boat' });
   }
 });
 
