@@ -24,7 +24,9 @@ const userSchema = new Schema(
       type: Boolean,
       default: false
     },
-    favouriteBoats: [{ type: Schema.Types.ObjectId, ref: 'Boat' }]
+    favouriteBoats: [{ type: Schema.Types.ObjectId, ref: 'Boat' }],
+    resetToken: String,
+    resetTokenExpiration: String
   },
   {
     timestamps: true

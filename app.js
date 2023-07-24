@@ -18,7 +18,7 @@ require('./config')(app);
 
 // 👇 Start handling routes here
 const indexRoutes = require('./routes/index.routes');
-app.use('/api', isAuthenticated, indexRoutes);
+app.use('/api', indexRoutes);
 const boatRoutes = require('./routes/boat.routes');
 app.use('/api', isAuthenticated, boatRoutes);
 const authRoutes = require('./routes/auth.routes');

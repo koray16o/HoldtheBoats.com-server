@@ -3,6 +3,10 @@ const User = require('../models/User.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { isAuthenticated } = require('../middleware/jwt.middleware');
+const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const saltRounds = 10;
 
@@ -120,6 +124,89 @@ router.get('/verify', isAuthenticated, (req, res, next) => {
     res.json(req.payload);
   } catch (error) {
     console.log(error);
+  }
+});
+//-----------------------------------------------------------------------
+
+router.use(bodyParser.json());
+
+router.post('/forgot-password', async (req, res, next) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+
+    const resetToken = jwt.sign({ email }, process.env.TOKEN_SECRET);
+
+    // This will save the reset token and its expiration time to the user's document in the database
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+      }
+    });
+
+    const emailContent = `
+    <h1>Reset Your Password</h1>
+    <p>Click the link below to reset your password:</p>
+    <a href="${process.env.FRONTEND_RESET_URL}/?token=${resetToken}">Reset Password</a>
+  `;
+
+    // Configure the email options
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Password Reset Request',
+      html: emailContent
+    };
+
+    // With this the email will be sent
+    await transporter.sendMail(mailOptions);
+
+    res.json({ message: 'Password reset email sent successfully' });
+  } catch (error) {
+    console.error('Error sending reset token', error);
+    res.status(500).json({ error: 'Failed to send reset token' });
+  }
+});
+
+//Now to reset the password:
+
+router.post('/reset-password', async (req, res, next) => {
+  const { resetToken, newPassword } = req.body;
+
+  const object = jwt.verify(resetToken, process.env.TOKEN_SECRET);
+  const { email } = object;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+
+    // Checking if the reset token is valid and not expired
+
+    // Reset the user's password
+    const saltRounds = 10;
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hashedPassword = bcrypt.hashSync(newPassword, salt);
+    user.password = hashedPassword;
+
+    // Clear the reset token and its expiration time
+    user.resetToken = undefined;
+    user.resetTokenExpiration = undefined;
+
+    await user.save();
+
+    // Return a success response to the client
+    res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error('Error resetting password', error);
+    res.status(500).json({ error: 'Failed to reset password' });
   }
 });
 
