@@ -40,12 +40,14 @@ router.post('/newboat', async (req, res, next) => {
     country,
     price
   } = req.body;
+  const ownerId = req.payload._id;
 
   try {
     const newBoat = await Boat.create({
       title,
       imgURL,
       type,
+      owner: ownerId,
       year,
       condition,
       length,
@@ -82,7 +84,7 @@ router.get('/boats/:id', async (req, res, next) => {
       return res.status(400).json({ message: 'Specified id is not valid' });
     }
 
-    const boat = await Boat.findById(id);
+    const boat = await Boat.findById(id).populate('owner');
     if (!boat) {
       return res.status(404).json({ message: 'No boat found with that id' });
     }
@@ -96,6 +98,7 @@ router.get('/boats/:id', async (req, res, next) => {
 
 router.put('/boats/:id', async (req, res, next) => {
   const { id } = req.params;
+  const ownerId = req.params._id;
   const {
     title,
     imgURL,
@@ -161,6 +164,11 @@ router.put('/boats/:id', async (req, res, next) => {
         .status(404)
         .json({ message: 'No boat found with specified id' });
     }
+    if (updatedBoat.owner !== ownerId) {
+      return res
+        .status(403)
+        .json({ message: 'You are not the owner of this post' });
+    }
     res.json(updatedBoat);
   } catch (error) {
     console.log('An error ocurred updating the boat', error);
@@ -170,10 +178,16 @@ router.put('/boats/:id', async (req, res, next) => {
 
 router.delete('/boats/:id', async (req, res, next) => {
   const { id } = req.params;
+  const ownerId = req.payload._id;
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'Specified id is not valid' });
+    }
+    if (Boat.owner !== ownerId) {
+      return res
+        .status(403)
+        .json({ message: 'You are not the owner of this post' });
     }
     await Boat.findByIdAndDelete(id);
     res.json({ message: `Boat with id ${id} was deleted successfuly` });

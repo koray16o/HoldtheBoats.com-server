@@ -210,4 +210,31 @@ router.post('/reset-password', async (req, res, next) => {
   }
 });
 
+router.post('/contact-owner', async (req, res) => {
+  const { email, userEmail, message } = req.body;
+  console.log('Received data:', email, userEmail, message);
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD
+    }
+  });
+  const mailOptions = {
+    from: userEmail,
+    to: email,
+    subject: 'Contact request from Holdtheboats.com',
+    text: message
+  };
+  try {
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'Email sent successfully' });
+  } catch (error) {
+    console.log('Error sending email', error);
+    res.status(500).json({ message: 'Failed to send email' });
+  }
+});
+
 module.exports = router;
