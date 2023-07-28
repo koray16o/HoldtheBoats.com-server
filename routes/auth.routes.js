@@ -223,13 +223,13 @@ router.post('/contact-owner', async (req, res) => {
     }
   });
   const mailOptions = {
-    from: userEmail,
-    to: email,
+    from: email,
+    to: userEmail,
     subject: 'Contact request from Holdtheboats.com',
     html: `<h4>Hello!</h4>
      <p>Someone saw your boat ad and wants to contact you! Here you can check the message they sent:</p>
      <p>${message}</p>
-     <p>You can contact them back via ${userEmail}</p>
+     <p>You can contact them back via ${email}</p>
      <p>Thank you!</p>
      <p>Holdtheboats Team.</p>`
   };
