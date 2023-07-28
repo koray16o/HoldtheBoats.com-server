@@ -226,7 +226,12 @@ router.post('/contact-owner', async (req, res) => {
     from: userEmail,
     to: email,
     subject: 'Contact request from Holdtheboats.com',
-    text: message
+    html: `<h4>Hello!</h4>
+     <p>Someone saw your boat ad and wants to contact you! Here you can check the message they sent:</p>
+     <p>${message}</p>
+     <p>You can contact them back via ${userEmail}</p>
+     <p>Thank you!</p>
+     <p>Holdtheboats Team.</p>`
   };
   try {
     await transporter.sendMail(mailOptions);

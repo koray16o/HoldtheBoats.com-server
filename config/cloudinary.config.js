@@ -11,7 +11,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    allowed_formats: ['jpg', 'png', 'mov', 'mp4', 'webm'],
+    allowed_formats: ['jpg', 'png', 'mov', 'mp4', 'webm', 'webp'],
     folder: 'Holdtheboats'
   }
 });

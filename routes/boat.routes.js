@@ -81,7 +81,9 @@ router.get('/boats/:id', async (req, res, next) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Specified id is not valid' });
+      return res
+        .status(400)
+        .json({ message: 'Specified id is not valid on showing boat details' });
     }
 
     const boat = await Boat.findById(id).populate('owner');
@@ -127,7 +129,9 @@ router.put('/boats/:id', async (req, res, next) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id))
-      return res.status(400).json({ message: 'Specified Id is not valid' });
+      return res
+        .status(400)
+        .json({ message: 'Specified Id is not valid on edit boats' });
 
     const updatedBoat = await Boat.findByIdAndUpdate(
       id,
@@ -164,11 +168,11 @@ router.put('/boats/:id', async (req, res, next) => {
         .status(404)
         .json({ message: 'No boat found with specified id' });
     }
-    if (updatedBoat.owner !== ownerId) {
+    /* if (updatedBoat.owner !== ownerId) {
       return res
         .status(403)
         .json({ message: 'You are not the owner of this post' });
-    }
+    } */
     res.json(updatedBoat);
   } catch (error) {
     console.log('An error ocurred updating the boat', error);
@@ -182,13 +186,15 @@ router.delete('/boats/:id', async (req, res, next) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Specified id is not valid' });
+      return res
+        .status(400)
+        .json({ message: 'Specified id is not valid on delete boats' });
     }
-    if (Boat.owner !== ownerId) {
+    /* if (Boat.owner !== ownerId) {
       return res
         .status(403)
         .json({ message: 'You are not the owner of this post' });
-    }
+    } */
     await Boat.findByIdAndDelete(id);
     res.json({ message: `Boat with id ${id} was deleted successfuly` });
   } catch (error) {
@@ -197,7 +203,7 @@ router.delete('/boats/:id', async (req, res, next) => {
   }
 });
 
-router.post('/upload', fileUploader.array('files'), (req, res, next) => {
+router.post('/upload', fileUploader.array('files', 20), (req, res, next) => {
   try {
     res.json({ fileUrl: req.files[0].path });
   } catch (error) {
@@ -221,14 +227,25 @@ router.post('/search', async (req, res) => {
 });
 
 router.get('/boats/favourites', async (req, res) => {
-  const userId = req.session.currentUser._id;
-  const user = await User.findById(userId).populate('favouriteBoats');
-
-  res.json({ favouriteBoats: user.favouriteBoats });
+  try {
+    const userId = req.payload._id;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
+    const user = await User.findById(userId).populate('favouriteBoats');
+    console.log('user.favboats', user.favouriteBoats);
+    res.json({ favouriteBoats: user.favouriteBoats });
+  } catch (error) {
+    console.log('Error in boats/favourites', error);
+    console.log('req.payload:', req.payload);
+    console.log('Request headers:', req.headers);
+    console.log('favouriteboats:', favouriteBoats);
+    res.status(400).json({ message: 'Error in boats/favourites' });
+  }
 });
 
 router.post('/boats/:id/favourites', async (req, res) => {
-  const userId = req.session.currentUser._id;
+  const userId = req.payload._id;
   const userToCheck = await User.findById(userId);
   const user = await User.findByIdAndUpdate(userId, {
     $push: { favouriteBoats: req.params.id }
@@ -238,7 +255,7 @@ router.post('/boats/:id/favourites', async (req, res) => {
 
 router.post('/boats/favourites/delete/:id', async (req, res) => {
   try {
-    const userId = req.session.currentUser._id;
+    const userId = req.payload._id;
     await User.findByIdAndUpdate(userId, {
       $pull: { favouriteBoats: req.params.id }
     });
